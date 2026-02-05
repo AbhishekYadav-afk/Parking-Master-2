@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkMaster Pro | Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+        .slot-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <div id="auth-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="glass p-8 rounded-2xl border border-slate-800 w-full max-auto max-w-md shadow-2xl">
+            <div id="login-form">
+                <h2 class="text-3xl font-bold mb-6 text-blue-400 text-center">Login</h2>
+                <input type="email" placeholder="Email Address" class="w-full mb-4 p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="password" placeholder="Password" class="w-full mb-6 p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <button onclick="showDashboard()" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition">Sign In</button>
+                <p class="text-center mt-4 text-sm text-slate-400">Don't have an account? <span onclick="toggleAuth()" class="text-blue-400 cursor-pointer">Register</span></p>
+            </div>
+            
+            <div id="register-form" class="hidden">
+                <h2 class="text-3xl font-bold mb-6 text-purple-400 text-center">Create Account</h2>
+                <input type="text" placeholder="Full Name" class="w-full mb-4 p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                <input type="email" placeholder="Email Address" class="w-full mb-4 p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                <input type="password" placeholder="Password" class="w-full mb-6 p-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                <button onclick="showDashboard()" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-bold transition">Register Now</button>
+                <p class="text-center mt-4 text-sm text-slate-400">Already a member? <span onclick="toggleAuth()" class="text-purple-400 cursor-pointer">Login</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <nav class="p-4 border-b border-slate-800 flex justify-between items-center glass sticky top-0 z-50">
+            <h1 class="text-xl font-black italic tracking-tighter text-blue-500">PARKMASTER PRO</h1>
+            <div class="flex gap-6 items-center">
+                <span class="text-sm font-medium text-slate-400" id="stats">Available: <span class="text-green-400" id="available-count">8</span></span>
+                <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-4 py-1 rounded text-sm hover:bg-red-500 hover:text-white transition">Logout</button>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">Live Parking Grid</h2>
+                    <div class="flex gap-2">
+                        <span class="text-xs bg-amber-500/20 text-amber-500 px-2 py-1 rounded border border-amber-500/30">Premium Zones Highlighted</span>
+                    </div>
+                </div>
+                <div id="slot-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass p-6 rounded-2xl border border-slate-800">
+                    <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2"><i class="fas fa-info-circle mr-2 text-blue-400"></i>Reservation Info</h3>
+                    <div id="detail-placeholder" class="text-slate-500 text-sm italic">Select a slot to view car and driver details...</div>
+                    <div id="detail-view" class="hidden space-y-4">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <span class="text-slate-400 uppercase text-xs font-bold">Driver:</span>
+                            <span id="det-driver" class="font-semibold"></span>
+                            <span class="text-slate-400 uppercase text-xs font-bold">Plate No:</span>
+                            <span id="det-plate" class="font-mono text-blue-400"></span>
+                            <span class="text-slate-400 uppercase text-xs font-bold">Car Model:</span>
+                            <span id="det-car" class="font-semibold"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <h3 class="text-lg font-bold mb-4"><i class="fas fa-credit-card mr-2 text-green-400"></i>Payment Selection</h3>
+                    <div class="space-y-3">
+                        <select id="billing-cycle" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm" onchange="calculatePrice()">
+                            <option value="5">Hourly ($5.00)</option>
+                            <option value="40">Daily ($40.00)</option>
+                            <option value="800">Monthly ($800.00)</option>
+                        </select>
+                        <div class="flex justify-between items-center p-4 bg-slate-950 rounded-xl">
+                            <span class="text-sm font-bold">Total Due:</span>
+                            <span id="total-price" class="text-2xl font-black text-green-400">$5.00</span>
+                        </div>
+                        <button onclick="processPayment()" class="w-full bg-green-600 hover:bg-green-700 py-4 rounded-xl font-bold shadow-lg transition transform active:scale-95">
+                            Confirm & Pay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data Mockup for requirements
+        const slotsData = [
+            { id: 1, type: 'Standard', status: 'available', driver: null, plate: null, car: null },
+            { id: 2, type: 'Premium', status: 'occupied', driver: 'John Wick', plate: 'BABA-YAGA', car: '69 Mustang' },
+            { id: 3, type: 'Standard', status: 'available', driver: null, plate: null, car: null },
+            { id: 4, type: 'Premium', status: 'available', driver: null, plate: null, car: null },
+            { id: 5, type: 'Standard', status: 'occupied', driver: 'Sarah Connor', plate: 'T-800', car: 'CyberTruck' },
+            { id: 6, type: 'Standard', status: 'available', driver: null, plate: null, car: null },
+            { id: 7, type: 'Standard', status: 'available', driver: null, plate: null, car: null },
+            { id: 8, type: 'Premium', status: 'available', driver: null, plate: null, car: null }
+        ];
+
+        let currentSelection = null;
+
+        function toggleAuth() {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('register-form').classList.toggle('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('slot-grid');
+            grid.innerHTML = '';
+            let freeCount = 0;
+
+            slotsData.forEach(slot => {
+                if(slot.status === 'available') freeCount++;
+                const isPremium = slot.type === 'Premium';
+                
+                const card = document.createElement('div');
+                card.className = `slot-transition relative p-4 rounded-xl border-2 cursor-pointer h-24 flex flex-col justify-center items-center
+                    ${slot.status === 'occupied' ? 'bg-red-500/10 border-red-500/50' : 'bg-slate-900 border-slate-800 hover:border-blue-500'}
+                    ${isPremium ? 'ring-1 ring-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : ''}
+                    ${currentSelection === slot.id ? 'border-blue-500 bg-blue-500/10' : ''}`;
+
+                card.innerHTML = `
+                    <span class="text-[10px] absolute top-2 left-2 font-bold ${isPremium ? 'text-amber-500' : 'text-slate-500'}">${slot.type.toUpperCase()}</span>
+                    <span class="text-xl font-black">${slot.id}</span>
+                    <span class="text-[10px] mt-1 ${slot.status === 'occupied' ? 'text-red-400' : 'text-green-400'}">${slot.status.toUpperCase()}</span>
+                `;
+
+                card.onclick = () => selectSlot(slot);
+                grid.appendChild(card);
+            });
+            document.getElementById('available-count').innerText = freeCount;
+        }
+
+        function selectSlot(slot) {
+            currentSelection = slot.id;
+            renderGrid();
+
+            const placeholder = document.getElementById('detail-placeholder');
+            const view = document.getElementById('detail-view');
+
+            if(slot.status === 'occupied') {
+                placeholder.classList.add('hidden');
+                view.classList.remove('hidden');
+                document.getElementById('det-driver').innerText = slot.driver;
+                document.getElementById('det-plate').innerText = slot.plate;
+                document.getElementById('det-car').innerText = slot.car;
+            } else {
+                placeholder.classList.remove('hidden');
+                placeholder.innerText = `Slot ${slot.id} is free. Complete payment to book.`;
+                view.classList.add('hidden');
+            }
+            calculatePrice();
+        }
+
+        function calculatePrice() {
+            const rate = parseFloat(document.getElementById('billing-cycle').value);
+            const slot = slotsData.find(s => s.id === currentSelection);
+            
+            // Requirement 5: Premium Surcharge
+            const finalPrice = (slot && slot.type === 'Premium') ? rate * 1.5 : rate;
+            document.getElementById('total-price').innerText = `$${finalPrice.toFixed(2)}`;
+        }
+
+        function processPayment() {
+            if(!currentSelection) return alert("Select a slot first!");
+            const slot = slotsData.find(s => s.id === currentSelection);
+            if(slot.status === 'occupied') return alert("This slot is already occupied!");
+
+            alert("Payment successful! Slot reserved.");
+            slot.status = 'occupied';
+            slot.driver = "New User";
+            slot.plate = "TEMP-123";
+            slot.car = "Sedan";
+            renderGrid();
+        }
+    </script>
+</body>
+</html>
